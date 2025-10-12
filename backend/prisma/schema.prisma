@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Conference {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  formInstructions String?  // Instructions/copy shown before form fields
+
+  // Branding
+  logoUrl     String?
+  primaryColor String?  @default("#3B82F6")
+
+  // URLs
+  formUrl     String?  // Full URL to the form
+  shortUrl    String?  // Shortened URL
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  // Relations
+  formFields  FormField[]
+  submissions Submission[]
+  analytics   Analytics[]
+
+  @@map("conferences")
+}
+
+model FormField {
+  id           String   @id @default(uuid())
+  conferenceId String
+  conference   Conference @relation(fields: [conferenceId], references: [id], onDelete: Cascade)
+
+  // Field configuration
+  fieldName    String   // e.g., "firstName", "email", "company"
+  label        String   // e.g., "First Name", "Email Address"
+  fieldType    FieldType @default(TEXT)
+  placeholder  String?
+  required     Boolean  @default(true)
+  order        Int      @default(0)
+
+  // Field versioning and lifecycle
+  isActive     Boolean  @default(true)  // If false, field is archived/deprecated
+  originalFieldId String?              // Links to original field when versioned
+
+  // Validation
+  validation   Json?    // Store validation rules as JSON
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("form_fields")
+  @@index([conferenceId, order])
+  @@index([conferenceId, isActive])
+}
+
+enum FieldType {
+  TEXT
+  EMAIL
+  PHONE
+  URL
+  TEXTAREA
+  SELECT
+  CHECKBOX
+  RADIO
+}
+
+model Submission {
+  id           String   @id @default(uuid())
+  conferenceId String
+  conference   Conference @relation(fields: [conferenceId], references: [id], onDelete: Cascade)
+
+  // Form data (stored as JSON for flexibility)
+  formData     Json
+
+  // Metadata
+  ipAddress    String?
+  userAgent    String?
+  submittedAt  DateTime @default(now())
+
+  @@map("submissions")
+  @@index([conferenceId, submittedAt])
+}
+
+model Analytics {
+  id           String   @id @default(uuid())
+  conferenceId String
+  conference   Conference @relation(fields: [conferenceId], references: [id], onDelete: Cascade)
+
+  // Event tracking
+  eventType    EventType
+  timestamp    DateTime @default(now())
+
+  // Additional metadata
+  metadata     Json?
+
+  @@map("analytics")
+  @@index([conferenceId, eventType, timestamp])
+}
+
+enum EventType {
+  PAGE_VIEW
+  FORM_SUBMIT
+  QR_SCAN
+}
