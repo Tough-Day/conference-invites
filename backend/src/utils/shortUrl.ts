@@ -1,41 +1,46 @@
-// Short URL service integration
-// This will be customized based on the API you provide
+// TDY Shortener API integration
+// https://tdy.one/api/urls
 
-interface ShortUrlResponse {
-  shortUrl: string;
-  originalUrl: string;
+interface TdyShortUrlResponse {
+  short_url: string;
+  original_url: string;
+  custom_code?: string;
+  title?: string;
 }
 
-export async function createShortUrl(longUrl: string): Promise<string> {
-  const apiKey = process.env.SHORT_URL_API_KEY;
-  const apiEndpoint = process.env.SHORT_URL_API_ENDPOINT;
-
-  if (!apiKey || !apiEndpoint) {
-    console.warn('Short URL API not configured, returning original URL');
-    return longUrl;
-  }
+export async function createShortUrl(longUrl: string, title?: string): Promise<string> {
+  const TDY_API_KEY = '5cb1356e-2d0f-4c49-9883-500784b7de65';
+  const TDY_API_ENDPOINT = 'https://tdy.one/api/urls';
 
   try {
-    // This is a placeholder - will be customized based on your API
-    const response = await fetch(apiEndpoint, {
+    const requestBody: { original_url: string; title?: string } = {
+      original_url: longUrl,
+    };
+
+    // Add title if provided (e.g., event name)
+    if (title) {
+      requestBody.title = title;
+    }
+
+    const response = await fetch(TDY_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'X-API-Key': TDY_API_KEY,
       },
-      body: JSON.stringify({
-        url: longUrl,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
-      throw new Error(`Short URL API returned ${response.status}`);
+      const errorData = await response.text();
+      throw new Error(`TDY API returned ${response.status}: ${errorData}`);
     }
 
-    const data = await response.json() as ShortUrlResponse;
-    return data.shortUrl;
+    const data = await response.json() as TdyShortUrlResponse;
+    console.log(`[TDY] Created short URL: ${data.short_url} for ${longUrl}`);
+    return data.short_url;
   } catch (error) {
-    console.error('Error creating short URL:', error);
+    console.error('Error creating short URL with TDY API:', error);
     // Fallback to original URL if shortening fails
     return longUrl;
   }
