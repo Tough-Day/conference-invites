@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
+import pg from 'pg';
 import passport from './config/passport.js';
 import authRouter from './routes/auth.js';
 import { conferenceRouter } from './routes/conferences.js';
@@ -13,6 +15,19 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// PostgreSQL session store
+const PgSession = connectPgSimple(session);
+const pgPool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+// Handle pool errors
+pgPool.on('error', (err) => {
+  console.error('Unexpected error on idle PostgreSQL client (session pool):', err);
+});
+
+console.log('[Session] Configuring PostgreSQL session store...');
+
 // Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
@@ -20,9 +35,15 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Session configuration
+// Session configuration with PostgreSQL store
 app.use(
   session({
+    store: new PgSession({
+      pool: pgPool,
+      tableName: 'session', // Table name for sessions
+      createTableIfMissing: true, // Auto-create table in development
+      pruneSessionInterval: 60 * 15, // Cleanup expired sessions every 15 minutes
+    }),
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
