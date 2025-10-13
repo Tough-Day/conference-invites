@@ -28,17 +28,21 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
         <div className="text-center">
+          <div className="flex justify-center mb-6">
+            <img
+              src="/assets/toughday-logo.png"
+              alt="Tough Day Logo"
+              className="h-20 object-contain"
+            />
+          </div>
           <h2 className="text-3xl font-bold text-gray-900">
-            Conference Invites
+            Tough Day Forms
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Admin Dashboard
-          </p>
         </div>
 
         <div className="mt-8">
           <p className="text-center text-sm text-gray-600 mb-4">
-            Sign in with your <span className="font-semibold">@tough.day</span> Google account to access the admin dashboard.
+            Sign in with your <span className="font-semibold">@tough.day</span> Google account to access the platform.
           </p>
 
           <button
@@ -67,7 +71,7 @@ const Login = () => {
           </button>
 
           <p className="mt-4 text-xs text-center text-gray-500">
-            Only @tough.day Google Workspace accounts can access this dashboard.
+            Only @tough.day Google Workspace accounts can access this platform.
           </p>
         </div>
       </div>
