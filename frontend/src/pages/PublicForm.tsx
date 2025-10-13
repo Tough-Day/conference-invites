@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { api } from '../services/api';
 import { Conference } from '../types';
@@ -7,6 +7,7 @@ import { Conference } from '../types';
 export default function PublicForm() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [conference, setConference] = useState<Conference | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -21,9 +22,19 @@ export default function PublicForm() {
         const data = await api.getConference(slug);
         setConference(data);
 
-        // Track page view only once using ref (persists across React Strict Mode double-renders)
+        // Track event only once using ref (persists across React Strict Mode double-renders)
         if (!hasTrackedRef.current) {
           hasTrackedRef.current = true;
+
+          // Check if this is a QR code scan (ref=qr parameter)
+          const isQrScan = searchParams.get('ref') === 'qr';
+
+          if (isQrScan) {
+            // Track QR scan event
+            await api.trackEvent(data.id, 'QR_SCAN');
+          }
+
+          // Always track page view as well
           await api.trackEvent(data.id, 'PAGE_VIEW');
         }
       } catch (error) {
@@ -34,7 +45,7 @@ export default function PublicForm() {
     };
 
     loadAndTrack();
-  }, [slug]);
+  }, [slug, searchParams]);
 
   const onSubmit = async (data: any) => {
     if (!conference) return;
@@ -95,8 +106,8 @@ export default function PublicForm() {
         <div className="bg-white rounded-lg shadow-lg p-8">
           {/* Header with Both Logos */}
           <div className="text-center mb-8">
-            {/* Logos Row */}
-            <div className="flex items-center justify-center gap-8 mb-6">
+            {/* Logos Row - Stacks vertically on mobile, horizontal on larger screens */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-6">
               {/* Toughday Logo */}
               <img
                 src="/assets/toughday-logo.png"
@@ -111,7 +122,7 @@ export default function PublicForm() {
               {/* Event Logo (if provided) */}
               {conference.logoUrl && (
                 <>
-                  <div className="w-px h-12 bg-gray-300"></div>
+                  <div className="w-px h-12 bg-gray-300 hidden sm:block"></div>
                   <img
                     src={conference.logoUrl}
                     alt={conference.name}

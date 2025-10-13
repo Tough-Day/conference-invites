@@ -357,10 +357,14 @@ conferenceRouter.get('/:id/qrcode', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'Conference not found' });
     }
 
-    const url = conference.shortUrl || conference.formUrl;
+    let url = conference.shortUrl || conference.formUrl;
     if (!url) {
       return res.status(400).json({ error: 'No URL available for QR code' });
     }
+
+    // Add tracking parameter for QR scans
+    const separator = url.includes('?') ? '&' : '?';
+    url = `${url}${separator}ref=qr`;
 
     const qrCodeDataUrl = await generateQRCode(url);
     res.json({ qrCode: qrCodeDataUrl, url });
