@@ -324,7 +324,7 @@ export default function ConferenceCreate() {
                 <div className="flex flex-col items-center flex-1">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-lg transition-all duration-300 ${
                     currentStep > step
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-teal-600 text-white'
                       : currentStep === step
                       ? 'bg-teal-600 text-white scale-110 shadow-lg'
                       : 'bg-white text-gray-400 border-2 border-gray-300'
@@ -337,7 +337,7 @@ export default function ConferenceCreate() {
                 </div>
                 {step < 3 && (
                   <div className={`h-1 flex-1 mx-4 rounded transition-all duration-300 ${
-                    currentStep > step ? 'bg-green-500' : 'bg-gray-300'
+                    currentStep > step ? 'bg-teal-600' : 'bg-gray-300'
                   }`} />
                 )}
               </div>
@@ -566,7 +566,7 @@ export default function ConferenceCreate() {
                 <button
                   type="submit"
                   disabled={loading || !canProceed()}
-                  className="px-8 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium flex items-center gap-2 transition-all transform hover:scale-105 disabled:transform-none"
+                  className="px-8 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium flex items-center gap-2 transition-all transform hover:scale-105 disabled:transform-none"
                 >
                   {loading ? 'Creating...' : 'Create Event'} <Check size={20} />
                 </button>
