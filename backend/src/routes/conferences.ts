@@ -2,11 +2,12 @@ import { Router } from 'express';
 import { prisma } from '../db.js';
 import { generateQRCode } from '../utils/qrCode.js';
 import { createShortUrl } from '../utils/shortUrl.js';
+import { requireAuth } from '../middleware/auth.js';
 
 export const conferenceRouter = Router();
 
-// Get all conferences
-conferenceRouter.get('/', async (req, res) => {
+// Get all conferences (admin only)
+conferenceRouter.get('/', requireAuth, async (req, res) => {
   try {
     const conferences = await prisma.conference.findMany({
       include: {
@@ -25,11 +26,14 @@ conferenceRouter.get('/', async (req, res) => {
     // Transform validation to options
     const transformed = conferences.map(conf => ({
       ...conf,
-      formFields: conf.formFields.map(field => ({
-        ...field,
-        options: field.validation?.options || undefined,
-        validation: field.validation?.options ? undefined : field.validation
-      }))
+      formFields: conf.formFields.map(field => {
+        const validation = field.validation as any;
+        return {
+          ...field,
+          options: validation?.options || undefined,
+          validation: validation?.options ? undefined : field.validation
+        };
+      })
     }));
 
     res.json(transformed);
@@ -39,8 +43,8 @@ conferenceRouter.get('/', async (req, res) => {
   }
 });
 
-// Get single conference by ID
-conferenceRouter.get('/id/:id', async (req, res) => {
+// Get single conference by ID (admin only)
+conferenceRouter.get('/id/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const conference = await prisma.conference.findUnique({
@@ -59,11 +63,14 @@ conferenceRouter.get('/id/:id', async (req, res) => {
     // Transform validation to options
     const transformed = {
       ...conference,
-      formFields: conference.formFields.map(field => ({
-        ...field,
-        options: field.validation?.options || undefined,
-        validation: field.validation?.options ? undefined : field.validation
-      }))
+      formFields: conference.formFields.map(field => {
+        const validation = field.validation as any;
+        return {
+          ...field,
+          options: validation?.options || undefined,
+          validation: validation?.options ? undefined : field.validation
+        };
+      })
     };
 
     res.json(transformed);
@@ -93,11 +100,14 @@ conferenceRouter.get('/:slug', async (req, res) => {
     // Transform validation to options
     const transformed = {
       ...conference,
-      formFields: conference.formFields.map(field => ({
-        ...field,
-        options: field.validation?.options || undefined,
-        validation: field.validation?.options ? undefined : field.validation
-      }))
+      formFields: conference.formFields.map(field => {
+        const validation = field.validation as any;
+        return {
+          ...field,
+          options: validation?.options || undefined,
+          validation: validation?.options ? undefined : field.validation
+        };
+      })
     };
 
     res.json(transformed);
@@ -107,8 +117,8 @@ conferenceRouter.get('/:slug', async (req, res) => {
   }
 });
 
-// Create new conference
-conferenceRouter.post('/', async (req, res) => {
+// Create new conference (admin only)
+conferenceRouter.post('/', requireAuth, async (req, res) => {
   try {
     const { name, slug, description, formInstructions, logoUrl, primaryColor, formFields } = req.body;
 
@@ -154,8 +164,8 @@ conferenceRouter.post('/', async (req, res) => {
   }
 });
 
-// Update conference
-conferenceRouter.put('/:id', async (req, res) => {
+// Update conference (admin only)
+conferenceRouter.put('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, formInstructions, logoUrl, primaryColor, isActive, formFields } = req.body;
@@ -302,11 +312,14 @@ conferenceRouter.put('/:id', async (req, res) => {
     // Transform validation to options
     const transformed = {
       ...updated,
-      formFields: updated!.formFields.map(field => ({
-        ...field,
-        options: field.validation?.options || undefined,
-        validation: field.validation?.options ? undefined : field.validation
-      }))
+      formFields: updated!.formFields.map(field => {
+        const validation = field.validation as any;
+        return {
+          ...field,
+          options: validation?.options || undefined,
+          validation: validation?.options ? undefined : field.validation
+        };
+      })
     };
 
     res.json(transformed);
@@ -316,8 +329,8 @@ conferenceRouter.put('/:id', async (req, res) => {
   }
 });
 
-// Delete conference
-conferenceRouter.delete('/:id', async (req, res) => {
+// Delete conference (admin only)
+conferenceRouter.delete('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.conference.delete({
@@ -330,8 +343,8 @@ conferenceRouter.delete('/:id', async (req, res) => {
   }
 });
 
-// Generate QR code for conference
-conferenceRouter.get('/:id/qrcode', async (req, res) => {
+// Generate QR code for conference (admin only)
+conferenceRouter.get('/:id/qrcode', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const conference = await prisma.conference.findUnique({

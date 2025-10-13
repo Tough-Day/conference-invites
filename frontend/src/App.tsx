@@ -5,17 +5,50 @@ import ConferenceEdit from './pages/ConferenceEdit';
 import ConferenceDetail from './pages/ConferenceDetail';
 import PublicForm from './pages/PublicForm';
 import SubmissionSuccess from './pages/SubmissionSuccess';
+import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Routes>
-      {/* Admin Routes */}
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/conferences/new" element={<ConferenceCreate />} />
-      <Route path="/conferences/:id" element={<ConferenceDetail />} />
-      <Route path="/conferences/:id/edit" element={<ConferenceEdit />} />
+      {/* Auth Routes */}
+      <Route path="/login" element={<Login />} />
 
-      {/* Public Routes */}
+      {/* Admin Routes - Protected */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/conferences/new"
+        element={
+          <ProtectedRoute>
+            <ConferenceCreate />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/conferences/:id"
+        element={
+          <ProtectedRoute>
+            <ConferenceDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/conferences/:id/edit"
+        element={
+          <ProtectedRoute>
+            <ConferenceEdit />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Public Routes - No Auth Required */}
       <Route path="/form/:slug" element={<PublicForm />} />
       <Route path="/success" element={<SubmissionSuccess />} />
     </Routes>

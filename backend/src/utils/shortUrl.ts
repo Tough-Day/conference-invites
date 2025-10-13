@@ -32,7 +32,7 @@ export async function createShortUrl(longUrl: string): Promise<string> {
       throw new Error(`Short URL API returned ${response.status}`);
     }
 
-    const data: ShortUrlResponse = await response.json();
+    const data = await response.json() as ShortUrlResponse;
     return data.shortUrl;
   } catch (error) {
     console.error('Error creating short URL:', error);

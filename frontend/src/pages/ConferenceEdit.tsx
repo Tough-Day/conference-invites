@@ -552,8 +552,8 @@ export default function ConferenceEdit() {
                     >
                       <div className="space-y-3">
                         {formFields.map((field, index) => {
-                          const hasTypeChanged = field.id && originalFieldTypes.has(field.id) &&
-                                                originalFieldTypes.get(field.id) !== field.fieldType;
+                          const hasTypeChanged = Boolean(field.id && originalFieldTypes.has(field.id) &&
+                                                originalFieldTypes.get(field.id) !== field.fieldType);
                           return (
                             <SortableFieldItem
                               key={`field-${index}`}

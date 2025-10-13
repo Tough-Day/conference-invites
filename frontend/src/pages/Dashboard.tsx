@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, LogOut, ChevronDown } from 'lucide-react';
 import { api } from '../services/api';
 import { Conference } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     loadConferences();
@@ -15,10 +18,14 @@ export default function Dashboard() {
 
   const loadConferences = async () => {
     try {
+      console.log('[Dashboard] Loading conferences...');
       const data = await api.getConferences();
+      console.log('[Dashboard] Conferences loaded:', data);
       setConferences(data);
-    } catch (error) {
-      console.error('Error loading conferences:', error);
+    } catch (error: any) {
+      console.error('[Dashboard] Error loading conferences:', error.response?.status, error.response?.data || error.message);
+      // Show error to user instead of just logging
+      alert(`Failed to load events: ${error.response?.data?.error || error.message}. Check console for details.`);
     } finally {
       setLoading(false);
     }
@@ -49,6 +56,42 @@ export default function Dashboard() {
             <Plus size={18} />
             New Event
           </button>
+
+          {/* User Avatar Dropdown */}
+          {user && (
+            <div className="relative flex-shrink-0">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <img
+                  src={user.avatar || 'https://via.placeholder.com/40'}
+                  alt={user.name || 'User'}
+                  className="w-10 h-10 rounded-full border-2 border-gray-200"
+                />
+                <div className="text-left hidden sm:block">
+                  <p className="text-sm font-semibold text-gray-900">{user.name}</p>
+                  <p className="text-xs text-gray-500">{user.email}</p>
+                </div>
+                <ChevronDown size={16} className={`text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      logout();
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Events List */}
