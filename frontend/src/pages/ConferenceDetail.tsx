@@ -31,10 +31,10 @@ export default function ConferenceDetail() {
   const loadData = async () => {
     try {
       const [confData, subsData, qrData, analyticsData] = await Promise.all([
-        fetch(`/api/conferences/id/${id}`).then(r => r.json()),
+        api.getConferenceById(id!),
         api.getSubmissions(id!, 50),
         api.getQRCode(id!),
-        fetch(`/api/analytics/conference/${id}`).then(r => r.json()).catch(() => null),
+        api.getAnalytics(id!).catch(() => null),
       ]);
 
       setConference(confData);

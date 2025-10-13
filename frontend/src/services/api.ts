@@ -19,6 +19,13 @@ export const api = {
     return res.json();
   },
 
+  getConferenceById: async (id: string) => {
+    const res = await fetch(`${API_BASE}/conferences/id/${id}`, {
+      credentials: 'include',
+    });
+    return res.json();
+  },
+
   createConference: async (data: any) => {
     const res = await fetch(`${API_BASE}/conferences`, {
       method: 'POST',

@@ -140,6 +140,7 @@ conferenceRouter.post('/', requireAuth, async (req, res) => {
         primaryColor,
         formUrl,
         shortUrl,
+        isActive: true,
         formFields: {
           create: formFields.map((field: any, index: number) => ({
             fieldName: field.fieldName,

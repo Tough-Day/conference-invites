@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, LogOut, ChevronDown } from 'lucide-react';
+import { Plus, LogOut, ChevronDown, BookOpen } from 'lucide-react';
 import { api } from '../services/api';
 import { Conference } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -43,19 +43,8 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex items-start gap-6 mb-6">
+        <div className="flex items-start justify-between gap-6 mb-6">
           <img src="/assets/toughday-logo.png" alt="Tuffy Day Logo" className="h-16 object-contain flex-shrink-0" />
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Events Form Manager</h1>
-            <p className="text-gray-600 text-sm">Create and manage event registration forms with QR codes and track submissions in real-time</p>
-          </div>
-          <button
-            onClick={() => navigate('/conferences/new')}
-            className="bg-teal-600 text-white px-5 py-2.5 rounded-lg hover:bg-teal-700 flex items-center gap-2 font-medium shadow transition-all text-sm flex-shrink-0"
-          >
-            <Plus size={18} />
-            New Event
-          </button>
 
           {/* User Avatar Dropdown */}
           {user && (
@@ -81,7 +70,17 @@ export default function Dashboard() {
                   <button
                     onClick={() => {
                       setShowUserMenu(false);
-                      logout();
+                      navigate('/guide');
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <BookOpen size={16} />
+                    User Guide
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setShowUserMenu(false);
+                      await logout();
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                   >
@@ -92,6 +91,23 @@ export default function Dashboard() {
               )}
             </div>
           )}
+        </div>
+
+        {/* Title - Centered */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Events Form Manager</h1>
+          <p className="text-gray-600 text-sm">Create and manage event registration forms with QR codes and track submissions in real-time</p>
+        </div>
+
+        {/* New Event Button */}
+        <div className="mb-4 flex justify-end">
+          <button
+            onClick={() => navigate('/conferences/new')}
+            className="bg-teal-600 text-white px-5 py-2.5 rounded-lg hover:bg-teal-700 flex items-center gap-2 font-medium shadow transition-all text-sm"
+          >
+            <Plus size={18} />
+            New Event
+          </button>
         </div>
 
         {/* Events List */}

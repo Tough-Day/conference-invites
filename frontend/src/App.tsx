@@ -6,6 +6,7 @@ import ConferenceDetail from './pages/ConferenceDetail';
 import PublicForm from './pages/PublicForm';
 import SubmissionSuccess from './pages/SubmissionSuccess';
 import Login from './pages/Login';
+import UserGuide from './pages/UserGuide';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -44,6 +45,14 @@ function App() {
         element={
           <ProtectedRoute>
             <ConferenceEdit />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/guide"
+        element={
+          <ProtectedRoute>
+            <UserGuide />
           </ProtectedRoute>
         }
       />
