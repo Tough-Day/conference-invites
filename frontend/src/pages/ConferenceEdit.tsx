@@ -218,7 +218,7 @@ export default function ConferenceEdit() {
 
   const loadConference = async () => {
     try {
-      const data = await fetch(`/api/conferences/id/${id}`).then(r => r.json());
+      const data = await api.getConferenceById(id!);
       setConference(data);
       setFormData({
         name: data.name,
