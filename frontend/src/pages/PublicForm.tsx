@@ -27,15 +27,32 @@ export default function PublicForm() {
           hasTrackedRef.current = true;
 
           // Check if this is a QR code scan (ref=qr parameter)
-          const isQrScan = searchParams.get('ref') === 'qr';
+          const refParam = searchParams.get('ref');
+          const isQrScan = refParam === 'qr';
+
+          console.log('[QR Tracking] URL params:', Object.fromEntries(searchParams.entries()));
+          console.log('[QR Tracking] ref parameter:', refParam);
+          console.log('[QR Tracking] Is QR scan:', isQrScan);
 
           if (isQrScan) {
             // Track QR scan event
-            await api.trackEvent(data.id, 'QR_SCAN');
+            console.log('[QR Tracking] Attempting to track QR_SCAN event for conference:', data.id);
+            try {
+              const result = await api.trackEvent(data.id, 'QR_SCAN');
+              console.log('[QR Tracking] QR_SCAN event tracked successfully:', result);
+            } catch (trackError) {
+              console.error('[QR Tracking] Failed to track QR_SCAN event:', trackError);
+            }
           }
 
           // Always track page view as well
-          await api.trackEvent(data.id, 'PAGE_VIEW');
+          console.log('[QR Tracking] Tracking PAGE_VIEW event for conference:', data.id);
+          try {
+            const result = await api.trackEvent(data.id, 'PAGE_VIEW');
+            console.log('[QR Tracking] PAGE_VIEW event tracked successfully:', result);
+          } catch (trackError) {
+            console.error('[QR Tracking] Failed to track PAGE_VIEW event:', trackError);
+          }
         }
       } catch (error) {
         console.error('Error loading conference:', error);

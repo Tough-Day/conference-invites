@@ -104,12 +104,26 @@ export const api = {
 
   // Analytics
   trackEvent: async (conferenceId: string, eventType: string, metadata?: any) => {
-    const res = await fetch(`${API_BASE}/analytics/track`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conferenceId, eventType, metadata }),
-    });
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/analytics/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conferenceId, eventType, metadata }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`[API] trackEvent failed with status ${res.status}:`, errorText);
+        throw new Error(`Failed to track event: ${res.status} ${errorText}`);
+      }
+
+      const result = await res.json();
+      console.log(`[API] trackEvent success: ${eventType} for conference ${conferenceId}`);
+      return result;
+    } catch (error) {
+      console.error(`[API] trackEvent error for ${eventType}:`, error);
+      throw error;
+    }
   },
 
   getAnalytics: async (conferenceId: string, startDate?: string, endDate?: string) => {

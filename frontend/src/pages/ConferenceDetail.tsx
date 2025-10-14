@@ -21,6 +21,7 @@ export default function ConferenceDetail() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
+  const [testingQR, setTestingQR] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -97,6 +98,35 @@ export default function ConferenceDetail() {
     } catch (error) {
       console.error('Error updating conference status:', error);
       alert('Failed to update event status');
+    }
+  };
+
+  const testQRTracking = async () => {
+    if (!id) return;
+
+    setTestingQR(true);
+    try {
+      console.log('[Test] Manually triggering QR_SCAN event for conference:', id);
+      await api.trackEvent(id, 'QR_SCAN', { test: true });
+      alert('Test QR scan tracked! Check browser console and backend logs, then refresh analytics.');
+      // Refresh analytics after a short delay to allow backend to process
+      setTimeout(() => loadData(), 1000);
+    } catch (error) {
+      console.error('[Test] Failed to track test QR scan:', error);
+      alert('Failed to track test QR scan. Check console for details.');
+    } finally {
+      setTestingQR(false);
+    }
+  };
+
+  const refreshAnalytics = async () => {
+    try {
+      const analyticsData = await api.getAnalytics(id!);
+      if (analyticsData?.summary) {
+        setAnalytics(analyticsData.summary);
+      }
+    } catch (error) {
+      console.error('Error refreshing analytics:', error);
     }
   };
 
@@ -196,26 +226,37 @@ export default function ConferenceDetail() {
           <div className="lg:col-span-3 space-y-4">
             {/* Analytics Stats */}
             {analytics && (
-              <div className="grid grid-cols-4 gap-3">
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="flex items-center gap-2">
-                    <Eye size={16} className="text-blue-600" />
-                    <div>
-                      <p className="text-xs text-gray-600">Page Views</p>
-                      <p className="text-xl font-bold text-gray-900">{analytics.pageViews}</p>
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h2 className="text-sm font-semibold text-gray-700">Analytics</h2>
+                  <button
+                    onClick={refreshAnalytics}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                  >
+                    <TrendingUp size={12} />
+                    Refresh
+                  </button>
+                </div>
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center gap-2">
+                      <Eye size={16} className="text-blue-600" />
+                      <div>
+                        <p className="text-xs text-gray-600">Page Views</p>
+                        <p className="text-xl font-bold text-gray-900">{analytics.pageViews}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="flex items-center gap-2">
-                    <Scan size={16} className="text-purple-600" />
-                    <div>
-                      <p className="text-xs text-gray-600">QR Scans</p>
-                      <p className="text-xl font-bold text-gray-900">{analytics.qrScans}</p>
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center gap-2">
+                      <Scan size={16} className="text-purple-600" />
+                      <div>
+                        <p className="text-xs text-gray-600">QR Scans</p>
+                        <p className="text-xl font-bold text-gray-900">{analytics.qrScans}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
                 <div className="bg-white rounded-lg shadow p-4">
                   <div className="flex items-center gap-2">
@@ -235,6 +276,7 @@ export default function ConferenceDetail() {
                       <p className="text-xl font-bold text-gray-900">{analytics.conversionRate}%</p>
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
             )}
@@ -317,6 +359,19 @@ export default function ConferenceDetail() {
               <h2 className="text-lg font-bold text-gray-900 mb-4">QR Code</h2>
 
               <div className="flex flex-col items-center">
+                {/* Display the actual QR URL for debugging */}
+                {qrCode && (
+                  <div className="w-full mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                    <p className="font-semibold text-blue-900 mb-1">QR Code URL:</p>
+                    <p className="text-blue-700 break-all font-mono text-[10px]">{qrCode}</p>
+                    {qrCode.includes('?ref=qr') ? (
+                      <p className="text-green-600 mt-1 font-semibold">✓ Tracking parameter present</p>
+                    ) : (
+                      <p className="text-red-600 mt-1 font-semibold">⚠ Tracking parameter MISSING</p>
+                    )}
+                  </div>
+                )}
+
                 <div className="bg-white p-3 rounded-lg border border-gray-200 mb-3">
                   <div id="qr-code-svg">
                     <QRCodeSVG
@@ -382,6 +437,15 @@ export default function ConferenceDetail() {
                   >
                     <Download size={16} />
                     Download QR Code
+                  </button>
+
+                  <button
+                    onClick={testQRTracking}
+                    disabled={testingQR}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Scan size={16} />
+                    {testingQR ? 'Testing...' : 'Test QR Tracking'}
                   </button>
                 </div>
               </div>

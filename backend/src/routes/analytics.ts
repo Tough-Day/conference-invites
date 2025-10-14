@@ -9,6 +9,12 @@ analyticsRouter.post('/track', async (req, res) => {
   try {
     const { conferenceId, eventType, metadata } = req.body;
 
+    console.log(`[Analytics] Tracking event: ${eventType} for conference: ${conferenceId}`, metadata ? `with metadata: ${JSON.stringify(metadata)}` : '');
+
+    if (eventType === 'QR_SCAN') {
+      console.log(`[Analytics] 🎯 QR CODE SCAN DETECTED for conference: ${conferenceId}`);
+    }
+
     const event = await prisma.analytics.create({
       data: {
         conferenceId,
@@ -17,9 +23,10 @@ analyticsRouter.post('/track', async (req, res) => {
       }
     });
 
+    console.log(`[Analytics] Event tracked successfully: ${event.id} (${eventType})`);
     res.status(201).json(event);
   } catch (error) {
-    console.error('Error tracking event:', error);
+    console.error('[Analytics] Error tracking event:', error);
     res.status(500).json({ error: 'Failed to track event' });
   }
 });
