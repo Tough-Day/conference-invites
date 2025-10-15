@@ -21,7 +21,6 @@ export default function ConferenceDetail() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
-  const [testingQR, setTestingQR] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -98,24 +97,6 @@ export default function ConferenceDetail() {
     } catch (error) {
       console.error('Error updating conference status:', error);
       alert('Failed to update event status');
-    }
-  };
-
-  const testQRTracking = async () => {
-    if (!id) return;
-
-    setTestingQR(true);
-    try {
-      console.log('[Test] Manually triggering QR_SCAN event for conference:', id);
-      await api.trackEvent(id, 'QR_SCAN', { test: true });
-      alert('Test QR scan tracked! Check browser console and backend logs, then refresh analytics.');
-      // Refresh analytics after a short delay to allow backend to process
-      setTimeout(() => loadData(), 1000);
-    } catch (error) {
-      console.error('[Test] Failed to track test QR scan:', error);
-      alert('Failed to track test QR scan. Check console for details.');
-    } finally {
-      setTestingQR(false);
     }
   };
 
@@ -359,25 +340,18 @@ export default function ConferenceDetail() {
               <h2 className="text-lg font-bold text-gray-900 mb-4">QR Code</h2>
 
               <div className="flex flex-col items-center">
-                {/* Display the actual QR URL for debugging */}
-                {qrCode && (
-                  <div className="w-full mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
-                    <p className="font-semibold text-blue-900 mb-1">QR Code URL:</p>
-                    <p className="text-blue-700 break-all font-mono text-[10px]">{qrCode}</p>
-                    {qrCode.includes('?ref=qr') ? (
-                      <p className="text-green-600 mt-1 font-semibold">✓ Tracking parameter present</p>
-                    ) : (
-                      <p className="text-red-600 mt-1 font-semibold">⚠ Tracking parameter MISSING</p>
-                    )}
-                  </div>
-                )}
-
                 <div className="bg-white p-3 rounded-lg border border-gray-200 mb-3">
                   <div id="qr-code-svg">
                     <QRCodeSVG
                       value={qrCode}
                       size={160}
                       level="H"
+                      imageSettings={{
+                        src: '/assets/toughday-logo.png',
+                        height: 32,
+                        width: 32,
+                        excavate: true,
+                      }}
                     />
                   </div>
                 </div>
@@ -437,15 +411,6 @@ export default function ConferenceDetail() {
                   >
                     <Download size={16} />
                     Download QR Code
-                  </button>
-
-                  <button
-                    onClick={testQRTracking}
-                    disabled={testingQR}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Scan size={16} />
-                    {testingQR ? 'Testing...' : 'Test QR Tracking'}
                   </button>
                 </div>
               </div>
