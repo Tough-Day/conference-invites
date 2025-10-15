@@ -357,7 +357,8 @@ conferenceRouter.get('/:id/qrcode', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'Conference not found' });
     }
 
-    let url = conference.shortUrl || conference.formUrl;
+    // Always use formUrl for QR codes (not shortUrl) to preserve tracking parameter
+    let url = conference.formUrl;
     if (!url) {
       return res.status(400).json({ error: 'No URL available for QR code' });
     }
