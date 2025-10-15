@@ -347,9 +347,9 @@ export default function ConferenceDetail() {
                       size={160}
                       level="H"
                       imageSettings={{
-                        src: '/assets/toughday-logo.png',
-                        height: 32,
-                        width: 32,
+                        src: '/ToughDay_logo_V_black.png',
+                        height: 38,
+                        width: 40,
                         excavate: true,
                       }}
                     />
